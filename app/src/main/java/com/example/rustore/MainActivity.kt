@@ -76,6 +76,19 @@ class MainActivity : ComponentActivity() {
                             "Неверный номер. Формат номера: +7 9ХХ ХХХ-ХХ-ХХ",
                             Toast.LENGTH_LONG
                         ).show()
+                    },
+                    onShareText = { text ->
+                        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, text)
+                        }
+
+                        val chooserIntent = Intent.createChooser(
+                            sendIntent,
+                            "Поделиться через"
+                        )
+
+                        startActivity(chooserIntent)
                     }
                 )
             }
@@ -88,7 +101,8 @@ fun MainScreen(
     onOpenSecondActivity: (String) -> Unit,
     onEmptyText: () -> Unit,
     onDialPhone: (String) -> Unit,
-    onInvalidPhone: () -> Unit
+    onInvalidPhone: () -> Unit,
+    onShareText: (String) -> Unit
 ) {
     var inputText by remember { mutableStateOf("") }
     var inputPhone by remember { mutableStateOf("") }
@@ -126,6 +140,21 @@ fun MainScreen(
                 Text("Открыть вторую Activity")
             }
 
+            Button(
+                onClick = {
+                    val text = inputText.trim()
+
+                    if (text.isBlank()) {
+                        onEmptyText()
+                    } else {
+                        onShareText(text)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Поделиться текстом")
+            }
+
             OutlinedTextField(
                 value = inputPhone,
                 onValueChange = { inputPhone = it },
@@ -161,7 +190,8 @@ fun MainScreenPreview() {
             onOpenSecondActivity = {},
             onEmptyText = {},
             onDialPhone = {},
-            onInvalidPhone = {}
+            onInvalidPhone = {},
+            onShareText = {}
         )
     }
 }
