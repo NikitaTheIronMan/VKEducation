@@ -1,7 +1,9 @@
 
 package com.example.rustore
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -51,6 +53,29 @@ class MainActivity : ComponentActivity() {
                             "Введите текст",
                             Toast.LENGTH_SHORT
                         ).show()
+                    },
+                    onDialPhone = { phone ->
+                        val intent = Intent(
+                            Intent.ACTION_DIAL,
+                            Uri.fromParts("tel", phone, null)
+                        )
+
+                        try {
+                            startActivity(intent)
+                        } catch (e: ActivityNotFoundException) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Не найдено приложение для звонков",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    },
+                    onInvalidPhone = {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Неверный номер. Формат номера: +7 9ХХ ХХХ-ХХ-ХХ",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 )
             }
@@ -61,9 +86,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     onOpenSecondActivity: (String) -> Unit,
-    onEmptyText: () -> Unit
+    onEmptyText: () -> Unit,
+    onDialPhone: (String) -> Unit,
+    onInvalidPhone: () -> Unit
 ) {
     var inputText by remember { mutableStateOf("") }
+    var inputPhone by remember { mutableStateOf("") }
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -79,9 +107,7 @@ fun MainScreen(
                 value = inputText,
                 onValueChange = { inputText = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = {
-                    Text("Введите данные")
-                },
+                placeholder = { Text("Введите текст") },
                 minLines = 2
             )
 
@@ -99,6 +125,30 @@ fun MainScreen(
             ) {
                 Text("Открыть вторую Activity")
             }
+
+            OutlinedTextField(
+                value = inputPhone,
+                onValueChange = { inputPhone = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Введите номер телефона: +7 9ХХ ХХ ХХ") },
+                singleLine = true
+            )
+
+            Button(
+                onClick = {
+                    val phone =
+                        PhoneValidator.normalizeRussianMobilePhone(inputPhone)
+
+                    if (phone == null) {
+                        onInvalidPhone()
+                    } else {
+                        onDialPhone(phone)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Позвонить другу")
+            }
         }
     }
 }
@@ -109,7 +159,9 @@ fun MainScreenPreview() {
     RuStoreTheme {
         MainScreen(
             onOpenSecondActivity = {},
-            onEmptyText = {}
+            onEmptyText = {},
+            onDialPhone = {},
+            onInvalidPhone = {}
         )
     }
 }
