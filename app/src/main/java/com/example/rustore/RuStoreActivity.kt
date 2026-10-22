@@ -1,4 +1,3 @@
-
 package com.example.rustore
 
 import android.os.Bundle
@@ -6,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,10 +36,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.tooling.preview.Preview
 import com.example.rustore.domain.appdetails.AppDetails
 import com.example.rustore.domain.appdetails.Category
 import com.example.rustore.ui.theme.RuStoreTheme
-import androidx.compose.ui.tooling.preview.Preview
 
 private val AccentColor = Color(0xFF1769E0)
 private val BackgroundColor = Color(0xFFF5F7FA)
@@ -124,6 +124,35 @@ private val apps = listOf(
     )
 )
 
+/*
+ * Витрина содержит ровно девять приложений:
+ * семь существующих и два дополнительных.
+ */
+private val showcaseApps = apps + listOf(
+    AppDetails(
+        id = "pixtrix",
+        name = "Pixtrix",
+        developer = "Pixtrix Team",
+        category = Category.PHOTOGRAPHY,
+        ageRating = 0,
+        size = 18f,
+        iconUrl = "",
+        screenshotUrlList = null,
+        description = "Редактирование фотографий"
+    ),
+    AppDetails(
+        id = "tinychef",
+        name = "TinyChef",
+        developer = "TinyChef Team",
+        category = Category.FOOD,
+        ageRating = 0,
+        size = 22f,
+        iconUrl = "",
+        screenshotUrlList = null,
+        description = "Идеи рецептов на каждый день"
+    )
+)
+
 class RuStoreActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,14 +161,20 @@ class RuStoreActivity : ComponentActivity() {
 
         setContent {
             RuStoreTheme {
-                RuStoreScreen()
+                RuStoreNavigation(
+                    apps = apps,
+                    showcaseApps = showcaseApps
+                )
             }
         }
     }
 }
 
 @Composable
-private fun RuStoreScreen() {
+internal fun RuStoreScreen(
+    apps: List<AppDetails>,
+    onAppClick: (AppDetails) -> Unit
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundColor,
@@ -179,7 +214,10 @@ private fun RuStoreScreen() {
                     items = apps,
                     key = { app -> app.id }
                 ) { app ->
-                    AppItem(app = app)
+                    AppItem(
+                        app = app,
+                        onClick = { onAppClick(app) }
+                    )
                 }
             }
         }
@@ -230,9 +268,14 @@ private fun RuStoreToolbar() {
 }
 
 @Composable
-private fun AppItem(app: AppDetails) {
+internal fun AppItem(
+    app: AppDetails,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.White
@@ -290,7 +333,7 @@ private fun AppItem(app: AppDetails) {
 }
 
 @Composable
-private fun AppIcon(
+internal fun AppIcon(
     app: AppDetails,
     modifier: Modifier = Modifier
 ) {
@@ -357,6 +400,9 @@ private fun Category.displayName(): String = when (this) {
 @Composable
 private fun RuStoreScreenPreview() {
     RuStoreTheme {
-        RuStoreScreen()
+        RuStoreScreen(
+            apps = apps,
+            onAppClick = {}
+        )
     }
 }
