@@ -1,0 +1,45 @@
+package com.example.rustore.presentation.appdetails
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+
+@Composable
+fun AppDescription(
+    description: String,
+    collapsed: Boolean,
+    onReadMoreClick: () -> Unit,
+    modifier: Modifier = Modifier.Companion
+) {
+    Column(modifier) {
+        Text(text = "Описание приложения")
+
+        Spacer(Modifier.height(8.dp))
+
+        Text(
+            text = description,
+            maxLines = if (collapsed) Int.MAX_VALUE else 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        if (!collapsed) {
+            TextButton(
+                onClick = onReadMoreClick,
+                contentPadding = PaddingValues(horizontal = 0.dp)
+            ) {
+                Text(
+                    text = "Читать подробнее",
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
